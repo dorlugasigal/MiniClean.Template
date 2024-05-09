@@ -1,0 +1,31 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+
+stages:
+  - stage: StaticCodeAnalysis
+    displayName: Static Code Analysis
+    jobs:
+      - job: RunAnalysis
+        displayName: Run Analysis
+        steps:
+          - template: ./templates/static-code-analysis.yaml
+
+  - stage: ServicesBVT
+    displayName: Services Build Verification Tests
+    dependsOn: [] # Run in parallel to StaticCodeAnalysis
+    jobs:
+      - job: BVT
+        displayName: Build Verification Test
+        strategy:
+          matrix:
+            Api:
+              serviceName: "api"
+              projectFolder: "Api"
+        steps:
+          - template: ./templates/bvt.yaml
+            parameters:
+              SERVICE_NAME: $(serviceName)
+              PROJECT_FOLDER: $(projectFolder)

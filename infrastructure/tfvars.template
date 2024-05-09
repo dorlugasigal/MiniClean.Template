@@ -1,0 +1,7 @@
+env                                 = "<env>"
+location                            = "UK South"
+log_analytics_sku                   = "PerGB2018"
+app_plan_sku                        = "B1"
+image_tag_suffix                    = "<env>"
+app_registration_owners             = ["<app_registration_owners>"]
+sp_client_id                        = "<sp_client_id>"

@@ -1,0 +1,47 @@
+﻿<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup Label="Common">
+    <PackageVersion Include="Azure.Identity" Version="1.11.0" />
+    <PackageVersion Include="DotNetEnv" Version="3.0.0" />
+    <PackageVersion Include="HttpTracer" Version="2.1.1" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Polly" Version="8.3.0" />
+    <PackageVersion Include="RestSharp" Version="110.2.0" />
+    <PackageVersion Include="System.IO.Abstractions" Version="20.0.15" />
+    <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
+  </ItemGroup>
+  <ItemGroup Label="API">
+    <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.0" />
+    <PackageVersion Include="Carter" Version="8.0.0" />
+    <PackageVersion Include="Hl7.Fhir.R4" Version="5.4.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+  <ItemGroup Label="Core">
+    <PackageVersion Include="FluentValidation" Version="11.9.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
+  </ItemGroup>
+  <ItemGroup Label="Infrastructure">
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageVersion Include="IdentityModel" Version="6.2.0" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
+  </ItemGroup>
+  <ItemGroup Label="Common Tests">
+    <PackageVersion Include="NSubstitute" Version="5.1.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageVersion Include="Shouldly" Version="4.2.1" />
+    <PackageVersion Include="xunit" Version="2.6.5" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.6" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.0" />
+  </ItemGroup>
+  <ItemGroup Label="Integration Tests">
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.1" />
+  </ItemGroup>
+</Project>

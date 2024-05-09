@@ -1,0 +1,98 @@
+parameters:
+  - name: SERVICE_NAME
+  - name: PROJECT_FOLDER
+  - name: COVERAGE_GATE
+    type: string
+    default: 95
+
+steps:
+  - checkout: self
+    persistCredentials: true
+    clean: true
+    fetchDepth: 0
+
+  - task: Bash@3
+    displayName: 'Build'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: src
+      script: |
+        set -eux  # fail on error
+        cp ../docker/.env.template ../docker/.env
+        docker-compose -f ../docker/docker-compose.yml build ${{ parameters.SERVICE_NAME }}
+
+  - task: Bash@3
+    displayName: 'Unit Tests'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: tests/Unit.Tests
+      script: |
+        dotnet test -c Release --logger "trx;LogFileName=testresults.trx" --collect:"XPlat Code Coverage"
+
+  - task: Bash@3
+    displayName: 'Start Docker Compose'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: docker
+      script: |
+        set -eux  # fail on error
+        bash start.sh
+    env:
+      AZURE_CLIENT_SECRET: '$(AZURE_CLIENT_SECRET)'
+
+  - task: Bash@3
+    displayName: 'Integration Tests'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: tests/Integration.Tests
+      script: |
+        dotnet test -c Release --logger "trx;LogFileName=testresults.trx" --collect:"XPlat Code Coverage"
+    env:
+      ASPNETCORE_ENVIRONMENT: 'Testing'
+
+  - task: Bash@3
+    displayName: 'E2E Tests'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: tests/E2E.Tests
+      script: |
+        dotnet test --logger "trx;LogFileName=testresults.trx"
+    env:
+      AZURE_CLIENT_SECRET: '$(AZURE_CLIENT_SECRET)'
+
+  - task: Bash@3
+    displayName: 'Docker logs'
+    condition: always()
+    inputs:
+      targetType: 'inline'
+      workingDirectory: docker
+      script: |
+        docker compose logs    
+      
+  - task: PublishTestResults@2
+    displayName: 'Publish test results'
+    condition: always()
+    inputs:
+      testResultsFormat: 'VSTest'
+      testResultsFiles: $(System.DefaultWorkingDirectory)/tests/*/TestResults/*.trx
+      failTaskOnFailedTests: true
+
+  - script: |
+      dotnet tool install -g dotnet-reportgenerator-globaltool
+      reportgenerator -reports:**/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:Cobertura
+    displayName: 'Unify Test Coverage Reports'
+
+  - task: PublishCodeCoverageResults@1
+    displayName: 'Publish code coverage results'
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(Build.SourcesDirectory)/CodeCoverage/Cobertura.xml'
+
+  - task: BuildQualityChecks@9
+    displayName: 'Check test line coverage gate'
+    inputs:
+      checkCoverage: true
+      coverageFailOption: 'fixed'
+      coverageType: 'lines'
+      coverageThreshold: '${{parameters.COVERAGE_GATE}}'
+      explicitFilter: true

@@ -1,0 +1,31 @@
+steps:
+  - script: |
+      echo "env                                 = \"${{parameters.env}}\"" > ${{parameters.env}}.tfvars      
+      echo "location                            = \"$(location)\"" >> ${{parameters.env}}.tfvars
+      echo "sp_client_id                        = \"$(sp-miniclean-deployment-client-id)\"" >> ${{parameters.env}}.tfvars
+      echo "shared_resource_group_name          = \"$(shared_resource_group_name)\"" >> ${{parameters.env}}.tfvars
+      echo "image_tag_suffix                    = \"$(Build.BuildId)\"" >> ${{parameters.env}}.tfvars
+
+      cp ${{parameters.env}}.tfvars ./infrastructure/${{parameters.env}}.tfvars
+      cat ./infrastructure/${{parameters.env}}.tfvars
+    displayName: Prepare tfvars file
+
+  - task: Bash@3
+    displayName: 'Apply Infra on Azure'
+    name: deployEnv
+    inputs:
+      targetType: 'inline'
+      failOnStandardError: true
+      script: |
+        set -eux  # fail on error and log commands
+        
+        terraform  -chdir=infrastructure init -backend=true -backend-config="resource_group_name=$(shared_resource_group_name)" -backend-config="storage_account_name=$(tf_status_storage_account)" -backend-config="container_name=terraform" -backend-config="key=${{parameters.env}}-terraform.tfstate"
+        terraform  -chdir=infrastructure apply -auto-approve -var-file=${{parameters.env}}.tfvars
+        
+        echo "##vso[task.setvariable variable=web_app_host;isOutput=true]$(terraform  -chdir=infrastructure output web_app_host)"
+
+    env:
+      ARM_TENANT_ID: $(AZURE_TENANT_ID)
+      ARM_CLIENT_ID: $(sp-miniclean-deployment-client-id)
+      ARM_CLIENT_SECRET: $(sp-miniclean-deployment-client-secret)
+      ARM_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)

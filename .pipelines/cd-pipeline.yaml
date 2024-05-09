@@ -1,0 +1,93 @@
+trigger: none
+
+parameters:
+  - name: env
+    displayName: Environment to deploy to
+    type: string
+    default: dev
+    values:
+      - dev
+      - stg
+      - prd
+    
+variables:
+  - group: ${{parameters.env}}-variables
+  - group: ${{parameters.env}}-secrets
+  - name: acr_login_server
+    value: acrminiclean${{parameters.env}}.azurecr.io
+  - name: api_app_name
+    value: app-miniclean-${{parameters.env}}
+  - name: health_services_ws_name
+    value: hsminiclean${{parameters.env}}
+  - name: fhir_service_name
+    value: fhirminiclean${{parameters.env}}
+    
+resources:
+  pipelines:
+    - pipeline: ci-pipeline
+      source: CI
+      trigger: true
+
+stages:
+  - stage: DeployInfrastructure
+    displayName: Deploy Infrastructure
+    jobs:
+      - job: ApplyIaC
+        displayName: Apply Terraform Infrastructure as Code
+        steps:
+          - template: ./templates/deploy-infrastructure.yaml
+            parameters:
+              env: ${{parameters.env}}
+
+  - stage: DeployServices
+    displayName: Deploy Services
+    dependsOn: DeployInfrastructure
+    variables:
+      fhir_server_url: https://$(health_services_ws_name)-$(fhir_service_name).fhir.azurehealthcareapis.com/
+      web_app_host: $[stageDependencies.DeployInfrastructure.ApplyIaC.outputs['deployEnv.web_app_host']]
+    jobs:
+      - job: BuildAndPushAPI
+        displayName: Build And Push API
+        steps:
+        - task: Bash@3
+          displayName: Build API Image
+          inputs:
+            targetType: 'inline'
+            script: |
+              acr_name="acrminiclean${{parameters.env}}.azurecr.io"
+              docker build -t $acr_name/api:latest -t $acr_name/api:$(Build.BuildId) .
+              echo $acr_name/api:$(Build.BuildId) >> $(Build.SourcesDirectory)/image_tags.txt
+              echo $acr_name/api:latest >> $(Build.SourcesDirectory)/image_tags.txt
+            
+        - task: Docker@1
+          displayName: Push to ACR
+          inputs:
+            command: 'push'
+            containerregistrytype: Azure Container Registry
+            azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+            azureContainerRegistry: $(acr_login_server)
+            pushMultipleImages: true
+            imageNamesPath: $(Build.SourcesDirectory)/image_tags.txt
+            
+      - job: DeployAPI
+        dependsOn: BuildAndPushAPI
+        displayName: Deploy API
+        steps:
+        - task: AzureWebAppContainer@1
+          displayName: Deploy Container to Web App
+          inputs:
+            azureSubscription: $(azureSubscriptionEndpoint)
+            appName: $(api_app_name)
+            containers: $(acr_login_server)/api:$(Build.BuildId)
+
+      - job: SmokeTests
+        dependsOn: DeployAPI
+        displayName: Smoke Tests        
+        steps:
+          - script: |
+              API_BASE_URL=$(web_app_host) dotnet test --filter Category=Smoke --logger "trx;LogFileName=testresults.trx"
+            workingDirectory: tests/E2E.Tests
+            continueOnError: true
+            env:
+              AZURE_CLIENT_ID: $(sp-miniclean-deployment-client-id)
+              AZURE_CLIENT_SECRET: '$(sp-miniclean-deployment-client-secret)'
