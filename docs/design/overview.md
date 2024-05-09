@@ -50,7 +50,7 @@ startup.
 
 ## Result Object Pattern
 
-This project uses the [Result Object Pattern](https://www.milanjovanovic.tech/blog/functional-error-handling-in-dotnet-with-the-result-pattern) 
+This project uses the [Result Object Pattern](https://www.milanjovanovic.tech/blog/functional-error-handling-in-dotnet-with-the-result-pattern)
 to handle errors and exceptions. The Result Object Pattern is a functional
 programming pattern that allows us to handle errors and exceptions in a more explicit way than using try/catch blocks.
 It also allows us to avoid returning null values from methods. Instead, we return a Result object that contains either
@@ -60,30 +60,30 @@ Example usage from the `DataHubFhirClient` class:
 
 ```csharp
 public async Task<Result<T>> GetResource<T>(string resourceId) where T : Resource
-    {
-        var resourceType = ModelInfo.GetFhirTypeNameForType(typeof(T));
-        logger.LogInformation("Fetching resource {ResourceType}/{ResourceId} from FHIR service.", resourceType, resourceId);
+{
+    var resourceType = ModelInfo.GetFhirTypeNameForType(typeof(T));
+    logger.LogInformation("Fetching resource {ResourceType}/{ResourceId} from FHIR service.", resourceType, resourceId);
 
-        try
-        {
-            var response = await dataHubFhirClient.ReadAsync<T>($"{resourceType}/{resourceId}");
-            return response; // The return value will be implicitly converted to a Result<T> object with success status
-        }
-        catch (FhirOperationException ex) when (ex.Status == HttpStatusCode.NotFound)
-        {
-            logger.LogDebug("Resource {ResourceType}/{ResourceId} not found in FHIR service.", resourceType, resourceId);
-            return ex; // The exception will be implicitly converted to a Result<T> object with failure status
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error fetching resource {ResourceType}/{ResourceId} from FHIR service: {ErrorMessage}", resourceType, resourceId, ex.Message);
-            return ex; // The exception will be implicitly converted to a Result<T> object with failure status
-        }
+    try
+    {
+        var response = await dataHubFhirClient.ReadAsync<T>($"{resourceType}/{resourceId}");
+        return response; // The return value will be implicitly converted to a Result<T> object with success status
     }
+    catch (FhirOperationException ex) when (ex.Status == HttpStatusCode.NotFound)
+    {
+        logger.LogDebug("Resource {ResourceType}/{ResourceId} not found in FHIR service.", resourceType, resourceId);
+        return ex; // The exception will be implicitly converted to a Result<T> object with failure status
+    }
+    catch (Exception ex)
+    {
+        logger.LogError("Error fetching resource {ResourceType}/{ResourceId} from FHIR service: {ErrorMessage}", resourceType, resourceId, ex.Message);
+        return ex; // The exception will be implicitly converted to a Result<T> object with failure status
+    }
+}
 ```
 
-If a method returns a null value, it will be implicitly converted to a corresponding 
-Result object with neither a value nor an exception. This represents the null value, 
+If a method returns a null value, it will be implicitly converted to a corresponding
+Result object with neither a value nor an exception. This represents the null value,
 and can be checked using the `IsNull` property.
 
 For methods with a void return type, we use the `Result` struct instead of `Result<T>`.
@@ -155,9 +155,10 @@ Here's an example of the Common section in our `Directory.Packages.props` file :
 ```
 
 we're defining `PackageVersions` for nuget packages that are used across all our projects. This includes packages such as `Microsoft.Extensions.Http`, `Microsoft.Extensions.Logging.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions`.
-this way Projects that use both of these packages will use the same version. 
+this way Projects that use both of these packages will use the same version.
 
 ### .csproj files
+
 In your `.csproj` files, you don't need to specify the versions of the packages or the common properties that you have defined in `Directory.Build.props` and `Directory.Packages.props`. The versions and properties will be automatically applied to all projects in your solution. Here's an example of how a `.csproj` file might look:
 
 ```xml
@@ -171,4 +172,3 @@ In your `.csproj` files, you don't need to specify the versions of the packages 
 
 </Project>
 ```
-

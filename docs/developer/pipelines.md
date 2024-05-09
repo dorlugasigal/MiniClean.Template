@@ -131,19 +131,16 @@ Every environment name maps to a corresponding AzDO variable group, which holds 
 
 #### dev-variables
 
-- app_registration_owners
 - AZURE_SUBSCRIPTION_ID
 - AZURE_TENANT_ID
 - azureSubscriptionEndpoint
 - location
-- pds_fhir_certificate_name
 - shared_resource_group_name
 - tf_status_storage_account
 
 ### Stages
 
 1. **Deploy infrastructure:**
-    1. Download swagger file for API Management endpoint definition (note that the CD pipeline references the CI pipeline 'Build and Publish Swagger Docs' stage)
     2. Add Agent IP to Key Vault vnet_- in order for the ADO agent to be able to access the key vault during deployment, the agent's IP address needs to be added to the key vault's firewall.
     3. Create terraform tfvars file
     4. Apply Terraform Infrastructure as Code, using the tfvars file created in the previous step. Note that the tfstate file is stored in an Azure Storage Account, and the connection details are provided to Terraform via the `backend-config` parameters.

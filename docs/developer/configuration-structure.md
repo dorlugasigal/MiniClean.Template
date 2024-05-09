@@ -1,6 +1,7 @@
 # Configuration Structure
-# ------------------------
+
 There are five main configuration files in the `api` project. These are:
+
 1. appsettings.json
 2. appsettings.Local.json
 3. appsettings.Integration.json
