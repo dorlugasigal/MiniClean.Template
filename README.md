@@ -1,6 +1,9 @@
 # MiniClean.Template
 
-Welcome to MiniClean.Template! This repository holds the starting point for a .NET 8 minimal API, neatly organized using clean architecture principles. It's datastore is a FHIR service at the moment but can be easily switch to suit your needs.
+
+Welcome to MiniClean.Template! This repository holds the starting point for a .NET 8 minimal API, neatly organized using clean architecture principles. Its datastore is a FHIR service at the moment but can be easily switched to suit your needs.
+
+Some details about the reasoning behind this boilerplate can be found in a [blog post I wrote](https://devblogs.microsoft.com/ise/next-level-clean-architecture-boilerplate/)
 
 Here's what you'll find:
 
