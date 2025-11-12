@@ -423,6 +423,9 @@ FodyWeavers.xsd
 # Environment variable configuration files
 *.env
 
+# Docker mounted data (SQL Server, etc.)
+docker/mounted-data/
+
 # terraform
 *.tfvars
 *.tfplan

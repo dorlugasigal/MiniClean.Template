@@ -4,19 +4,13 @@
         <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
         <PackageReference Include="Carter" />
         <PackageReference Include="Hl7.Fhir.R4" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
     </ItemGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="Integration.Tests" />
         <InternalsVisibleTo Include="Unit.Tests" />
-    </ItemGroup>
-
-    <ItemGroup>
         <InternalsVisibleTo Include="Templates.Tests" />
-        <InternalsVisibleTo Include="Integration.Tests" />
-        <InternalsVisibleTo Include="Unit.Tests" />
     </ItemGroup>
 
     <ItemGroup>

@@ -23,11 +23,11 @@ public class GlobalExceptionHandlerTests
         var environment = Substitute.For<IWebHostEnvironment>();
         environment.EnvironmentName.Returns(environmentName);
 
-        var httpContext = Substitute.For<HttpContext>();
-        httpContext.RequestServices = Substitute.For<IServiceProvider>();
-        httpContext.Response.Body.Returns(new MemoryStream());
-        httpContext.Request.Method.Returns("GET");
-        httpContext.Request.Path.Returns(new PathString("/test"));
+        // Use DefaultHttpContext instead of mocking to properly support .NET 10 PipeWriter requirements
+        var httpContext = new DefaultHttpContext();
+        httpContext.Response.Body = new MemoryStream();
+        httpContext.Request.Method = "GET";
+        httpContext.Request.Path = new PathString("/test");
 
         var exception = (Exception)Activator.CreateInstance(exceptionType, "Test Exception")!;
         var cancellationToken = new CancellationToken();

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   api:
     image: api
@@ -51,7 +49,7 @@ services:
       SA_PASSWORD: ${SAPASSWORD}
       ACCEPT_EULA: "Y"
     healthcheck:
-      test: [ "CMD", "/opt/mssql-tools/bin/sqlcmd","-U sa -P ${SAPASSWORD} -Q 'SELECT * FROM INFORMATION_SCHEMA.TABLES'" ]
+      test: [ "CMD", "/opt/mssql-tools18/bin/sqlcmd","-U", "sa", "-P", "${SAPASSWORD}", "-Q", "SELECT 1", "-C" ]
       interval: 10s
       timeout: 10s
       retries: 6
